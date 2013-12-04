@@ -9,8 +9,7 @@ form div.checkamiscommun input {
 	display:inline-block;
 }
 #menuh ul li.horizontalcheck {
-	display:inline;
-/* necessaire pour un menu horizontal */
+	display:inline; /* necessaire pour un menu horizontal */
 }
 <![endif]-->
 
@@ -18,9 +17,9 @@ form div.checkamiscommun input {
 /* TABLE
  * ========================================================================= */
 table.treeTable {
-  border: 1px solid #888;
-  border-collapse: collapse;
-  line-height: 1;
+	border: 1px solid #888;
+	border-collapse: collapse;
+	line-height: 1;
 	margin-left : 1em;
 	width: 90%;
 }
@@ -98,13 +97,14 @@ table.treeTable tbody tr.user td span.userCommun{
 	background-size : 12px 12px;
 	margin-left: 0em;
 }
-table.treeTable tbody tr td.addAmi {
+treeTable tbody tr td.addAmi {
 	padding-left : 5.2em;
 }
 
 
-
-
+table.pceaTable  {
+	margin-bottom: 1em;
+}
 
 
 table.treeTable tbody tr td.amimain span.nameami{/*cancels previous*/
@@ -120,6 +120,12 @@ table.treeTable tbody tr.dossier td {
 }
 table.treeTable tbody tr.dossier {
 	border-top : 1px solid gray;
+}
+table.treeTable tbody tr.dossier > td{
+	padding-bottom: 8px;
+}
+table.treeTable tbody tr.dossier + tr > td{
+	padding-top: 8px;
 }
 table.treeTable tbody tr.dossier td.sold
 , table.treeTable tbody tr.dossier td.tc{
