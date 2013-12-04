@@ -4,7 +4,7 @@ class Compte {
 	private $myid;
 	private $iddossier;
 	
-	public $amis = array(); // (Entêtes à revoir) Tableau ([NameDossier]=>String, [EMail]=> ami@hgfh, [Solde]=>xxxeuros) [IsCommun]=>Array([0]=>IdContactCommun1,...)
+	public $amis = array(); // (Entêtes à revoir) Tableau ([NameDossier]=>String, [EMail]=> ami@hgfh, [Solde]=>xxxØ) [IsCommun]=>Array([0]=>IdContactCommun1,...)
 				//				[Lignes] => Array ((A VOIR ds cls_lignescompte)) [IdContact]=>id, ...)
 	
 	public $lignescpte;

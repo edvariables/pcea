@@ -69,13 +69,13 @@
 					
 					var stringcommuns;
 					
-					var strgsolde = "Mon solde : ";
+					var strgsolde = "mon solde : ";
 					var couleursolde = "black";
 					if (jsodossier.Solde == null || jsodossier.Solde == 0) {
 						jsodossier.Solde = 0;
-						strgsolde += " 0";
+						strgsolde += '<span class="number"> 0.00 Ø</span>';
 						}
-					else {strgsolde += parseFloat(jsodossier.Solde).toFixed(2) + " euros";
+					else {strgsolde += '<span class="number"> ' + parseFloat(jsodossier.Solde).toFixed(2) + " Ø</span>";
 						couleursolde = (jsodossier.Solde > 0) ?  "green" : "red";
 						}
 										
@@ -262,7 +262,7 @@
 			}
 			$this.after(($("<a href=''> </a>")
 							.text("Créer un nouveau compte entre amis")
-							.addClass("linkadddossier imgEDVTypeAdd")
+							.addClass("linkadddossier edvimgAdd")
 							.css("padding-left","19px")
 							.click(function(e) {
 								$this.comptes("addDossier",cptesjso.myId);
@@ -530,7 +530,7 @@
 							.addClass("annuleaddami"))
 						.append($("<td></td>")
 							.append($("<a href=''></a>")
-								.addClass("linkaddami imgEDVTypeAdd")	
+								.addClass("linkaddami edvimgAdd")	
 								.text("Ajouter un ami")							
 								.attr("title","Inviter un nouvel ami")
 								.click(function() {
@@ -581,15 +581,15 @@
 				else iscommwithme = false;
 				
 				
-				var strgsolde = "Solde : ";
+				var strgsolde = "son solde : ";
 				var couleursolde = "black";
 				if (jsoami.Solde == null || jsoami.Solde == 0) {
 					jsoami.Solde = 0;
-					strgsolde += " 0";
+					strgsolde += ' <span class="number">0.00 Ø</span>';
 				}
 				else {
 					if (jsoami.Solde>0) {strgsolde+="+";}
-					strgsolde += parseFloat(jsoami.Solde).toFixed(2) + " euros";
+					strgsolde += '<span class="number">' + parseFloat(jsoami.Solde).toFixed(2) + " Ø</span>";
 					couleursolde = (jsoami.Solde > 0) ?  "green" : "red";
 				}
 						
@@ -660,7 +660,7 @@
 					if (lmyrights >= 3) {
 						$rowami.find("td.amimain").prepend(
 							$("<a href=''></a>")
-								.addClass("linkaddcreance imgEDVTypeAdd")
+								.addClass("linkaddcreance edvimgAdd")
 								.text("Ajouter une écriture")
 								.attr("title","Ajouter une écriture entre vous et "+ jsoami.CName +".")
 /*click sur ajout creance	*/					.click(function(e) {
@@ -933,14 +933,14 @@
 					, minut = heuremin.substring(3,5);
 					
 					
-					var strgcreance = "Le " + jour + "/" + mois + "/" + annee + " à " + heure + "h" + minut + ", ";
+					var strgcreance = "<span class=\"datetime\">Le " + jour + "/" + mois + "/" + annee + " à " + heure + "h" + minut + ",</span> ";
 					strgcreance += (jsocreance.Price < 0)
 						? cptek["comm" + n].NameComm + " a reçu : " 
 						: cptek["comm" + n].NameComm + " a payé : ";
 					var strgcreanceabs = (jsocreance.Price < 0) 
-						? ((-1) * parseFloat(jsocreance.Price)).toFixed(2) + " euros"
-						: parseFloat(jsocreance.Price).toFixed(2) + " euros";
-					var couleurcreance = (jsocreance.Price < 0) ? "LightCoral" : "LightGreen";
+						? ((-1) * parseFloat(jsocreance.Price)).toFixed(2) + " Ø"
+						: parseFloat(jsocreance.Price).toFixed(2) + " Ø";
+					var couleurcreance = (jsocreance.Price < 0) ? "LightCoral" : "#82EC82";
 					
 										
 					var strgcomment = (jsocreance.Comment==null) ? "" : "<i>" + jsocreance.Comment + "</i>";
@@ -957,6 +957,7 @@
 								)
 								.append($("<span></span>")
 										.addClass("sommecreance")
+										.addClass("number")
 										.css({"color" : couleurcreance })										
 										.html(strgcreanceabs)
 									)
@@ -1004,13 +1005,13 @@
 				var heure = heuremin.substring(0,2);
 				var minut = heuremin.substring(3,5);
 			
-				var strgcreance = "Le " + jour + "/" + mois + "/" + annee + " à " + heure + "h" + minut + ", ";
+				var strgcreance = "<span class=\"datetime\">Le " + jour + "/" + mois + "/" + annee + " à " + heure + "h" + minut + ",</span> ";
 				strgcreance += (jsocreance.Price < 0)
 					? "j'ai reçu : " 
 					: "j'ai payé : ";
 				var strgcreanceabs = (jsocreance.Price < 0) 
-					? ((-1) * parseFloat(jsocreance.Price)).toFixed(2) + " euros"
-					: parseFloat(jsocreance.Price).toFixed(2) + " euros";
+					? ((-1) * parseFloat(jsocreance.Price)).toFixed(2) + " Ø"
+					: parseFloat(jsocreance.Price).toFixed(2) + " Ø";
 				var couleurcreance = (jsocreance.Price < 0) ? "red" : "green";					
 			
 				var strgcomment = (jsocreance.Comment==null) ? "" : "<i> " + jsocreance.Comment + "</i>";
@@ -1027,6 +1028,7 @@
 							)
 							.append($("<span></span>")
 								.addClass("sommecreance")
+								.addClass("number")
 								.css({"color" : couleurcreance })										
 								.html(strgcreanceabs)
 							)

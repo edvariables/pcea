@@ -4,7 +4,7 @@ class Amis {
 	private $myid;
 	private $iddossier;
 	
-	public $amis = array(); // (Entêtes à revoir) Tableau ([IdDossier]=>String, [EMail]=> ami@hgfh, [Solde]=>xxxeuros) [IsCommun]=>Array([comm0]=>IdContactCommun1,...)
+	public $amis = array(); // (Entêtes à revoir) Tableau ([IdDossier]=>String, [EMail]=> ami@hgfh, [Solde]=>xxxØ) [IsCommun]=>Array([comm0]=>IdContactCommun1,...)
 				//				[Lignes] => Array ((A VOIR ds cls_lignescompte)) [IdContact]=>id, ...)
 	
 	public $nbreamis;
