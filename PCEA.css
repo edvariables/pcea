@@ -1,0 +1,364 @@
+/*Forms
+*/
+form div.checkamiscommun input {
+	display : inline;
+
+}
+<!--[if IE]>
+#menuh  a {
+	display:inline-block;
+}
+#menuh ul li.horizontalcheck {
+	display:inline;
+/* necessaire pour un menu horizontal */
+}
+<![endif]-->
+
+/* treeTable
+/* TABLE
+ * ========================================================================= */
+table.treeTable {
+  border: 1px solid #888;
+  border-collapse: collapse;
+  line-height: 1;
+	margin-left : 1em;
+	width: 90%;
+}
+
+/* Caption
+ * ------------------------------------------------------------------------- */
+table.treeTable caption {
+  font-size: .9em;
+  font-weight: bold;
+}
+
+/* Header
+ * ------------------------------------------------------------------------- */
+table.treeTable thead {
+  background: #aaa url(/edv/jquery/treeTable/images/bg-table-thead.png) repeat-x top left;
+  font-size: .9em;
+}
+
+table.treeTable thead tr th {
+  border: 1px solid #888;
+  font-weight: normal;
+  padding: .3em 1.67em .1em 1.67em;
+  text-align: left;
+}
+
+/* Body
+ * ------------------------------------------------------------------------- */
+table.treeTable tbody{
+  border: 1px solid #888;
+  border-collapse: collapse;
+  line-height: 1;
+}
+table.treeTable tbody tr{
+  background: white;
+}
+
+table.treeTable tbody tr.loading td:first-child {
+	background : url(/edv/Images/loading.gif) no-repeat left center;
+}
+
+table.treeTable tbody tr td.infostatut, table.treeTable tbody tr td.infoami, table.treeTable tbody tr.newcreanceform {
+	font-size : smaller; 
+}
+table.treeTable tbody tr td.sold {
+	font-size : 0.95em; 
+}
+
+table.treeTable tbody tr.amis td.amimain a {
+	font-size : smaller; 
+}
+
+
+table.treeTable tbody tr td.tc{/*cancels previous*/
+	font-size : 1.5em;
+}
+
+table.treeTable tr:not(.devellope) td .expandericon {
+    background-image: url("/edv/jquery/treeTable/images/toggle-expand-dark.png");   
+}
+
+table.treeTable tr.developpe td .expandericon {
+    background-image: url("/edv/jquery/treeTable/images/toggle-collapse-dark.png");   
+}
+
+.treeTable tr td .expandericon {
+	background-position: left center;
+	background-repeat: no-repeat;
+	cursor: pointer;
+	padding: 0;
+	margin-left: -19px;
+	padding-left: 19px;
+}
+table.treeTable tbody tr.user td span.userCommun{
+	background : url(/edv/Images/ok.png) no-repeat 0px 4px;
+	background-size : 12px 12px;
+	margin-left: 0em;
+}
+table.treeTable tbody tr td.addAmi {
+	padding-left : 5.2em;
+}
+
+
+
+
+
+
+table.treeTable tbody tr td.amimain span.nameami{/*cancels previous*/
+	font-size : 1.1em;
+}
+table.treeTable tbody tr td.sold{
+	text-align : right;
+	padding-right : 1em;
+}
+table.treeTable tbody tr.dossier td {
+	border-top : 1px solid gray;
+	vertical-align: middle;
+}
+table.treeTable tbody tr.dossier {
+	border-top : 1px solid gray;
+}
+table.treeTable tbody tr.dossier td.sold
+, table.treeTable tbody tr.dossier td.tc{
+	font-weight : bold;
+}
+table.treeTable tbody tr.lastline > td {
+	padding-bottom: 1em;
+}
+
+table.treeTable tbody .linkaddami {
+	font-size : 0.9em;
+	padding-left: 19px;
+}
+
+.negative {
+	color : red;
+}
+table.treeTable tbody tr td {
+  cursor: default;
+  padding: 0.4em 1em 0.2em 1.5em;
+}
+
+table.treeTable th a.columnsExpander{
+	float: right;
+	position: relative;
+	right: -1.2em;
+	color: white;
+	font-weight: bold;
+}
+table.treeTable th a.columnsExpander:hover{
+	text-decoration: none;
+	color : green;
+	background-color : transparent;
+}
+
+/*table.treeTable span {
+  background-position: center left;
+  background-repeat: no-repeat;
+  padding: .2em 0 .2em 1.5em;
+}*/
+.edvnode {
+    background-image: url("/edv/jquery/treeTable/images/toggle-expand-dark.png");
+    background-position: left center;
+    display: inline;
+    margin-left: -17px;
+    padding-left: 14px;
+}
+.expanded > .edvnode {
+    background-image: url("/edv/jquery/treeTable/images/toggle-collapse-dark.png");
+}
+
+table.treeTable span.file {
+  background-image: url(/edv/jquery/treeTable/images/page_white_text.png);
+}
+
+table.treeTable span.folder {
+  background-image: url(/edv/jquery/treeTable/images/folder.png);
+}
+
+/*couleurs des lignes*/
+table.treeTable tbody tr.even {
+  background: #f3f3f3;
+}
+
+table.treeTable tbody tr.odd {
+  background: #fff;
+}
+
+.edvars table.treeTable {
+  display : inline;
+}
+
+.DataTable table.treeTable tbody tr.dossier.developpe > td {
+  background: #E6E6EE url(/edv/jquery/treeTable/images/bg-table-thead.png) repeat-x top left;
+}
+.DataTable table.treeTable tbody tr.dossier.developpe > td:first-of-type {
+  background: none;
+}
+.DataTable table.treeTable tbody tr.amis.developpe > td {
+  background: #F1F1F5 url(/edv/jquery/treeTable/images/bg-table-thead.png) repeat-x top left;
+}
+.DataTable table.treeTable tbody tr.amis.developpe > td:first-of-type {
+  background: none;
+}
+.DataTable table.treeTable tbody tr.creance {
+  background: #fcfcfd;
+}
+.DataTable table.treeTable tbody tr.newcreanceform td.selectsens,
+.DataTable table.treeTable tbody tr.newcreanceform td.inputprix,
+.DataTable table.treeTable tbody tr.newcreanceform td.inputcomment {
+
+  background: #F1F1F1;
+}
+
+.DataTable table.treeTable tbody tr.newcreanceform td.selectsens{
+  text-align : right;
+  
+}
+
+table.treeTable tbody tr:hover, table.treeTable tbody tr.pkIdArticle:hover {
+  background: #f6f6f6;
+}
+
+table.treeTable tbody tr.amis td.amimain span.nameami {
+	background : url(/edv/Images/edit.png) no-repeat 0px 2px;
+}
+
+table.treeTable tbody tr.dossier td.infostatut  .amiscommuns {
+	margin-left: 1em;
+}
+table.treeTable tbody tr.creances span.sommecreance  {
+	float : right;
+}
+
+/*Forms */
+
+form span.iscommun, form div.checkamiscommun span.conclusion {
+	font-weight:bold;
+}
+
+form span.iscommun {
+	background : url(/edv/Images/EDVType/True.png) no-repeat 0px 2px;
+	vertical-align: middle;
+	padding-left : 19px;
+	margin-right: 5em;
+	cursor: pointer;
+	
+}
+
+
+
+form span.isnotcommun {
+	background : url(/edv/Images/EDVType/False.png) no-repeat 0px 2px;
+	vertical-align: middle;
+	padding-left : 19px;
+	margin-right: 5em;
+	cursor : pointer;
+}
+/*Propriétés des variables EDV*/
+table.treeTable tbody tr.edvar span.Securized{
+	background : url(/edv/Images/EDVType/Password.png) no-repeat 0px 6px;
+	position: relative;
+	width : 20px;
+}
+table.treeTable tbody tr.edvar span.AutoReset{
+	background : url(/edv/Images/EDVType/VarAutoReset.png) no-repeat 0px 8px;
+	position: relative;
+	width : 20px;
+}
+table.treeTable tbody tr.edvar span.ReadOnly{
+	background : url(/edv/Images/EDVType/VarReadOnly.png) no-repeat 0px 7px;
+	position: relative;
+	width : 20px;
+}
+table.treeTable tbody tr.edvar span.Scripted{
+	background : url(/edv/Images/EDVType/Script.png) no-repeat 0px 8px;
+	position: relative;
+	width : 20px;
+}
+table.treeTable tbody tr.edvar span.Asynchron{
+	background : url(/edv/Images/EDVType/DateTime.png) no-repeat 0px 7px;
+	position: relative;
+	width : 20px;
+}
+table.treeTable tbody tr.edvar span.SaveLocation{	
+	position: relative;
+	font-size : smaller;
+}
+a.ValidateInvit {
+	background : url(/edv/Images/alert.png) no-repeat;
+	font-size: larger;
+	color: blue;
+	padding-left : 1.5em;
+}
+span.alert {
+	background : url(/edv/Images/alert.png) no-repeat;
+}
+
+
+
+
+select.creanceDir option[value="1"] {
+	color : green;
+}
+select.creanceDir option[value="-1"] {
+	color : red;
+}
+.EDVVisual.PCEA span.rowInfo{
+	color : gray;
+	font-size : small;
+	font-style: italic;
+	display: inline;
+	text-align:right;
+	float: right;
+	position: relative;
+	width: 40em;
+	top: -3.4em;
+}
+
+.pceaTable th.admin {
+	padding: 2px;
+}
+.pceaTable .admin .toggleadmin {
+	text-align: center;
+	display: block;
+	border: 1px outset gray;
+	border-radius: 2px;
+	padding: 4px 8px;
+	margin: 2px;
+	text-decoration: none;
+	color: #333333;
+}
+.pceaTable .admin .toggleadmin.ison {
+	background: none repeat scroll 0 0 #CCCCCC;
+	border: 2px inset;
+	border-radius: 2px;
+	color: black;
+}
+
+.wrapperpopupform > form {
+	background-color: white;
+}
+
+.historique {
+	padding-left: 2em;
+	float : right;
+}
+.linkaddcreance {
+	margin-left: 12px;
+	padding-left: 19px;
+	float: right;
+}
+
+.pceaTable .datetime {
+	font-size: smaller;
+	color: #333333;
+	margin-right: 1em;
+}
+.pceaTable .number {
+	font-family: Courier New;
+	white-space: no-wrap;
+}
