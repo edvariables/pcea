@@ -7,4 +7,4 @@ Version Php.
 Créé en parallèle de CoopEShop (http://coopeshop.net)
 Installation liée à EDVariables (http://edv.edvariables.net)
 
-Version php : Seb G.
+Version php : Seb G
