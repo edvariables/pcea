@@ -2,132 +2,88 @@
 include_once("config.php");
 
 session_start();
-if(isset($_SESSION["loggeduser"]) && (isset($_GET["myid"]))&& ($_GET["myid"]==$_SESSION["loggeduser"]["iduser"])) {
-	$myid = $_SESSION["loggeduser"]["iduser"];}
-else {die("Problème de connection : perte de l'iduser...");}
-
 
 if (isset($_GET["idami"])) {
 	$idami = $_GET["idami"];
 	}
-	else {die("Problème de connection : perte de l'idami...");}
+	else {die("ProblÃ¨me de connection : perte de l'idami...");}
 
-	
-// ouverture bdd
-try	{
-	$bddcoopeshop = new PDO('mysql:host='.$db_server.';dbname='.$db_name, $db_user, $db_password);
-		}
-catch (Exception $e)
-		{
-	        die('Erreur : ' . $e->getMessage());
-		}
-		
+$dbconn = new DbConnection();
+$user = new User($dbconn);
 
 if (isset($_GET["iddossier"])) {
-
-		$iddossier = $_GET["iddossier"];
-		
+		$iddossier = $_GET["iddossier"];	
 		if (isset($_GET["myrights"])) { 		
-			$myrights = $_GET["myrights"]; //A vérifier/comparer dans la base de données ??
-			
-		if ($myrights == 15) {
-					
+			$myrights = $_GET["myrights"];} else {die("ProblÃ¨me de connection : perte de vos myrights...");}
+		
 			if (isset($_GET["droits"])) { 	
 				$rightsami = $_GET["droits"];
-			
-				if (isset($_GET["comment"])) { 	
-							$commentuser = "'".$_GET["comment"]."'";
+					if (isset($_GET["comment"])) { 	
+							$commentuser = $_GET["comment"];
 							}
-					else {$commentuser="''";}
-				
-			//updatesql rights dans pceauser iddossier = idd, iduser=idami
+			//updatesql rights dans pceauser iddossier = idd, iduser=idami			
+			$sqlupdate = " UPDATE pceauser SET Rights = ?"
+					.", Comment = ?"
+					." WHERE IdDossier = ?"
+					." AND IdUser = ?";
 			
-			$sqlupdate = " UPDATE pceauser SET Rights = ".$rightsami
-					.", Comment = ".$commentuser
-					." WHERE IdDossier = ".$iddossier
-					." AND IdUser = ".$idami;
-			
-		
 					
-			$req = $bddcoopeshop->prepare($sqlupdate);	
-							try 
-							{
-							$req->execute();
-							} 
-							catch (POException $e) { die( "Erreur : " . $e->getMessage()); }									
-				} // fin de if droits
+			$req = $user->db->prepare($sqlupdate);	
+			$req->execute(array($rightsami,$commentuser,$iddossier,$idami));								
+			} // fin de if droits
 			
-			
-				
-						
-			if (isset($_GET['nombreamis'])) 
-			
-			{
-			//effacer les anciennes données de compte commun
-			$sqldelete = "DELETE FROM pceausercommun WHERE (IdUser1 = ".$idami." OR  IdUser2 = ".$idami.") AND IdDossier = " .$iddossier;
-			
-				$nbreamis = $_GET['nombreamis'];
-				$newcommuns = array();
-				$k=0;
-				for ($i=0;$i<$nbreamis;$i++) {
-					if ($_GET['ami'.$i]!=0 && $_GET['ami'.$i]!="0") {
-					$newcommuns[$k] = $_GET['ami'.$i];
-					$k++;
+			else {if (isset($_GET["comment"])) { 	
+				$commentuser = $_GET["comment"];
+				$sqlupdate = " UPDATE pceauser SET Comment = ?"
+								." WHERE IdDossier = ?"
+								." AND IdUser = ?";
+				$req = $user->db->prepare($sqlupdate);	
+				$req->execute(array($commentuser,$iddossier,$idami));
 					}
 				}
-			$bddcoopeshop->beginTransaction();
 			
-					
-			$stmt = $bddcoopeshop->prepare($sqldelete);	
-				try 
-				{
-				$stmt->execute();
-				} 
-				catch (POException $e) { die( "Erreur : " . $e->getMessage()); }
-
-			
-				
-			// inserer les nouvelles		
-			$sqlinsert = "INSERT INTO pceausercommun (IdDossier,IdUser1,IdUser2)"
-				." VALUES (:IdDossier,:IdUser1,:IdUser2)";
-								
-			$stmt = $bddcoopeshop -> prepare($sqlinsert);	
-			
-			$stmt->bindValue(':IdDossier',$iddossier);	
-			$stmt->bindParam(':IdUser1',$iduser1);
-			$stmt->bindParam(':IdUser2',$iduser2);	
-			
-			//boucle sur les cases cochées userscommun
-			 for ($i=0; $i<count($newcommuns); $i++) {
-				
-				$iduser1 = $newcommuns[$i];
-				$iduser2 = $idami;
-				try {$stmt->execute();} 
-				catch (POException $e) { die( "Erreur : " . $e->getMessage()); }
-						 
-				 $iduser1= $idami;
-				 $iduser2 = $newcommuns[$i];
-				try {$stmt->execute();} 
-				catch (POException $e) { die( "Erreur : " . $e->getMessage()); }
-				}	
-			
-			$bddcoopeshop->commit();
-							
-			} // fin de if checkcommuns
-							
-			}//fin de if rights==15
-
-		$ans = '{"myid" : "'.$myid.'"'
-			.', "iddossier": "'.$iddossier.'" }';
-									
-		} //fin de if myrights
-	 		
-		else	{ $ans = '{"myid" : "'.$myid.'" }';} 
-		
-	 	 	 
-	} // fin de if iddossier
-	 
-else { $ans = '{"myid" : "'.$myid.'" }';} 
+			if (($myrights==15) || ($myrights == 7) && ($idami == $user->id)) {
+						
+			if (isset($_GET['nombreamis'])) 			
+			{
+			$nbreamis = $_GET['nombreamis'];}
+			$newcommuns = array();
+			$k=0;
+			for ($i=0;$i<$nbreamis;$i++) {
+				if ($_GET['ami'.$i]!=0 && $_GET['ami'.$i]!="0") {
+				$newcommuns[$k] = $_GET['ami'.$i];
+				$k++;
+				}
+			}		
+			//effacer les anciennes donnÃ©es de compte commun
+			$sqldelete = "DELETE FROM pceausercommun WHERE (IdUser1 = ? OR  IdUser2 = ?) AND IdDossier = ?";					
+			$user->db->beginTransaction();								
+				$stmt = $user->db->prepare($sqldelete);	
+				$stmt->execute(array($idami,$idami,$iddossier));		
+				// inserer les nouvelles		
+				$sqlinsert = "INSERT INTO pceausercommun (IdDossier,IdUser1,IdUser2)"
+					." VALUES (:IdDossier,:IdUser1,:IdUser2)";									
+				$stmt = $user->db -> prepare($sqlinsert);					
+				$stmt->bindValue(':IdDossier',$iddossier);	
+				$stmt->bindParam(':IdUser1',$iduser1);
+				$stmt->bindParam(':IdUser2',$iduser2);					
+				//boucle sur les cases cochÃ©es userscommun
+				 for ($i=0; $i<count($newcommuns); $i++) {				
+					$iduser1 = $newcommuns[$i];
+					$iduser2 = $idami;
+					try {$stmt->execute();} 
+					catch (POException $e) { die( "Erreur : " . $e->getMessage()); }						 
+					 $iduser1= $idami;
+					 $iduser2 = $newcommuns[$i];
+					try {$stmt->execute();} 
+					catch (POException $e) { die( "Erreur : " . $e->getMessage()); }
+					}				
+			$user->db->commit();						
+			} // fin de droits a changer les comptes commun
+		$ans = '{"myid" : "'.$user->id.'"'
+			.', "iddossier": "'.$iddossier.'" }';									
+		} //fin de if iddossier	 		
+		else	{ $ans = '{"myid" : "'.$user->id.'" }';} 
 	 
 echo $ans;	 
 	 

@@ -1,35 +1,36 @@
 <?php 
 include_once("config.php");
+
 class Amis {
 	private $myid;
 	private $iddossier;
+	private $myrights;
 	
-	public $amis = array(); // (EntÍtes ‡ revoir) Tableau ([IdDossier]=>String, [EMail]=> ami@hgfh, [Solde]=>xxxÿ) [IsCommun]=>Array([comm0]=>IdContactCommun1,...)
+	public $items = array(); // (Ent√™tes √† revoir) Tableau ([IdDossier]=>String, [EMail]=> ami@hgfh, [Solde]=>xxx√ò) [IsCommun]=>Array([comm0]=>IdContactCommun1,...)
 				//				[Lignes] => Array ((A VOIR ds cls_lignescompte)) [IdContact]=>id, ...)
 	
 	public $nbreamis;
 	
-	public $lignescpte;
-	
+	public $communs = array();
 		
-	function __construct($lgdusr,$idd,$lgdrights) {
+	function __construct($lgdusr,$idd,$lgdrights,$comms) {
 			
 		$this->myid = $lgdusr;
 		$this->iddossier = $idd;
 		$this->myrights = $lgdrights;
-		
-		//requÍte sql pour rÈcupÈrer la liste des amis sur ce compte et leur solde
+		$this->communs = $comms;
+		//requ√™te sql pour r√©cup√©rer la liste des amis sur ce compte et leur solde
 			//connection bdd
 		try	{
-			$bddcoopeshop =new PDO('mysql:host='.$GLOBALS['db_server'].';dbname='.$GLOBALS['db_name'], $GLOBALS['db_user'], $GLOBALS['db_password']);
+			$bdd = new DbConnection();
 			}
 		catch (Exception $e)
 			{
 		        die('Erreur : ' . $e->getMessage());
 			}
-			//prÈparation requÍte
+			//pr√©paration requ√™te
 		$sql = 'SELECT  D.IdDossier,P.Status AS AmiStatus,P.Rights AS AmiRights, C.IdContact, C.Name AS CName, C.EMail, P.Comment AS CommentUser' .
-			',-1*SUM(LGD.Price) AS Solde, MAX(PUC.IdUser) AS IsCommunMax, MIN(PUC.IdUser) AS IsCommunMin' .		
+			', IFNULL(-1*SUM(LGD.Price),0) AS Solde, IFNULL(MAX(PUC.IdUser), 0) AS IsCommunMax, IFNULL(MIN(PUC.IdUser), 0) AS IsCommunMin' .		
 			' FROM pceauser P' .			
 				' INNER JOIN contact C' .
 					' ON P.IdUser = C.IdContact' .		
@@ -43,68 +44,86 @@ class Amis {
 					' ON LGD.IdDossier = P.IdDossier' .
 					' AND LGD.TypeDossier = "PCEA"' .
 					' AND LGD.IdArticle = PUC.IdUser' . 								
-			' WHERE P.IdDossier = ' . $this->iddossier .
-			' AND P.IdUser <> ' . $this->myid .				
+			' WHERE P.IdDossier = ?' .
+			' AND P.IdUser <> ?' .				
 			' GROUP BY D.IdDossier, P.Status, P.Rights, C.IdContact, C.Name, C.EMail'
 			;
-	//	echo $sql;	
+		//echo $sql;	
 			
-		$req = $bddcoopeshop -> prepare($sql);
-		$req->execute();
+		$req = $bdd -> select( $sql, array($this->iddossier, $this->myid ));
 		
 		$this->nbreamis = 0;
 		
-		while ($donnees = $req -> fetch(PDO::FETCH_ASSOC)) {
+		while ($donnees = $req -> fetch()) {
 		
-					$aminumber = "ami".$this->nbreamis;
-				 	$this->amis[$aminumber]=$donnees;
-					 $this->nbreamis ++;
-					  
-					 }
-					 
-		$i=0; //index de row dans la boucle qui suit
-		foreach ($this->amis as $row) {
+			$aminumber = "ami".$this->nbreamis;
+			$this->items[$aminumber] = $donnees;
+			$this->nbreamis ++;
+			  
+		}
 		
-			//  Ètablit la liste des users en compte commun avec  IdContact et remplit un tableau indexÈ de ces contacts
+		$i = 0; //index de row dans la boucle qui suit
+		foreach ($this->items as $row) {
+		
+			//  √©tablit la liste des users en compte commun avec  IdContact et remplit un tableau index√© de ces contacts
 			$row["IsCommun"]=array();
 			$nbrecommun = 0;
-				if ($row["IsCommunMin"]<>$row["IsCommunMax"]) {
-					$sqltest = 'SELECT IdUser2' .
-						' FROM pceausercommun' .
-						' WHERE IdDossier = ' . $row["IdDossier"] .
-						' AND IdUser1 = ' . $row["IdContact"] .
-						' AND IdUser2 <> ' .  $row["IdContact"];
-												
-					$reqtest = $bddcoopeshop -> prepare($sqltest);
-					$reqtest->execute();
-					
-					while ($listecomm = $reqtest -> fetch(PDO::FETCH_ASSOC)) {				
-						$row["IsCommun"]["com".$nbrecommun]=$listecomm["IdUser2"];
-						$nbrecommun ++;					 
-						}
-									 									 
-					}
-			$this->amis["ami".$i]["nbreCommun"] = $nbrecommun;
-			$this->amis["ami".$i]["isCommun"]=$row["IsCommun"];
+			if ($row["IsCommunMin"] != $row["IsCommunMax"]) {
+				$sqltest = 'SELECT IdUser2' .
+					' FROM pceausercommun' .
+					' WHERE IdDossier = ?' . 
+					' AND IdUser1 = ?' . 
+					' AND IdUser2 <> ?';
+											
+				$reqtest = $bdd -> select($sqltest, array($row["IdDossier"], $row["IdContact"], $row["IdContact"]));
 				
+				while ($listecomm = $reqtest -> fetch()) {				
+					$row["IsCommun"]["com".$nbrecommun] = $listecomm["IdUser2"];
+					$nbrecommun ++;					 
+				}
+																 
+			}
+			$this->items["ami".$i]["nbreCommun"] = $nbrecommun;
+			$this->items["ami".$i]["isCommun"] = $row["IsCommun"];
 			
 			$i++;	
-			}				
+		}				
+	}
+	
+	public function item($idami) {
+		$found = false;
+		$amidata;
+		foreach ($this->items as $key=>$value) {
+			if ($value["IdContact"] == $idami) {
+				$amidata = $value;
+				$found = true;	
+				break;
+			}
 		}
+		
+		if ($found)
+			return new Creances($this->myid, $this->iddossier, $idami, $this->communs);
+			
+		else return $found;
+	}
+		
 	public function serialize($format){
 				   	
-					if (!isset($format)) {$format = 'json';}  
-					if ($format=='json') {
-						$json = '{'
-							. '"myRights":"'.$this->myrights .'"'
-							. ' , "myId":"'.$this->myid .'"'
-							. ' , "idDossier":"'.$this->iddossier .'"'
-							. ' , "nbreAmis": '.$this->nbreamis 
-							. ' , "listeamis":' . json_encode($this->amis, JSON_FORCE_OBJECT)
-							. '}';						
-						return $json;
-						}	
-					}		
+		if (!isset($format)) {$format = 'json';}  
+		if ($format=='json') {
+			if (!isset($this->amiexpanded)) $this->amiexpanded = 0;
+			$json = '{'
+				. '"myRights":"'.$this->myrights .'"'
+				. ' , "myId":"'.$this->myid .'"'
+				. ' , "amiexpanded":"'.$this->amiexpanded .'"'
+				. ' , "idDossier":"'.$this->iddossier .'"'
+				. ' , "nbreAmis": '.$this->nbreamis 
+				. ' , "listeamis":' . json_encode($this->items, JSON_FORCE_OBJECT)
+				. '}';						
+			return $json;
+		}	
+	}
+			
 }
 
 

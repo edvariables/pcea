@@ -1,102 +1,80 @@
 <?php
 include_once("config.php");
 
+$iddossier = $_GET["iddossier"];		
+$mailami = $_GET["mailami"];	
+$myrights = $_GET["myrights"];
 
+$mailexploded = explode("@",$mailami);
 
-	try	{
-		$bddcoopeshop = new PDO('mysql:host='.$db_server.';dbname='.$db_name, $db_user, $db_password);
-		}
-	catch (Exception $e)
-		{
-	        die('Erreur : ' . $e->getMessage());
-		}
+$namenewcontact = $mailexploded[0];
 
-		$myid = $_GET["myid"];
-		$iddossier = $_GET["iddossier"];		
-		$mailami = $_GET["mailami"];	
-		$myrights = $_GET["myrights"];
-		
-	$mailexploded = explode("@",$mailami);
-		
-	$namenewcontact = $mailexploded[0];
-		
-	//vÈrifier que le mail entrÈ est celui d'un utilisateur enregistrÈ
-		
-	$sqlcheck = 'SELECT C.Name AS NameContact,C.IdContact AS IdContact, D.Name AS NameDossier'
-		.' FROM contact as C'
-		.' LEFT JOIN dossier as D'		
-		.' ON D.IdDossier=' . $iddossier 
-		.' AND D.TypeDossier="PCEA"'
-		.' WHERE EMail="'.$mailami.'"';
-		
-	$bddcoopeshop -> beginTransaction();	
-	$req = $bddcoopeshop -> prepare($sqlcheck);
-			$req->execute();
-				
-	$result = $req->fetch(PDO::FETCH_ASSOC);
-	
-	$bddcoopeshop -> commit();
-	
-	if (empty($result)) {
-		
-		
-		if (isset($mailexploded[1])&&count($mailexploded)==2) {	//‡ approfondir pour tester adresse mail valide ?
-		
-			//crÈer un nouveau contact
-			
-			$bddcoopeshop -> beginTransaction();
-			
-			//dÈterminer le numero de ligne	
-					
-			$sqlnumid = "SELECT IFNULL(MAX(IdContact),0)+1 AS numId"
-				." FROM contact"
-				;		
-			$req = $bddcoopeshop -> prepare($sqlnumid);
-					$req->execute();		
-			$rslt = $req->fetch(PDO::FETCH_ASSOC);
-			
-			$numId = $rslt["numId"];
-				
+//v√©rifier que le mail entr√© est celui d'un utilisateur enregistr√©
+
+$sqlcheck = 'SELECT C.Name AS NameContact,C.IdContact AS IdContact, D.Name AS NameDossier'
+.' FROM contact as C'
+.' LEFT JOIN dossier as D'		
+.' ON D.IdDossier = ?' 
+.' AND D.TypeDossier = ?'
+.' WHERE EMail = ?';
+
+$bdd = new DbConnection();
+$user = new User($bdd);	
+$req = $user->db -> select($sqlcheck,array($iddossier,"PCEA",$mailami));		
+$result = $req->fetch();
+	if (empty($result)) {	
+		if (count($mailexploded)==2 && $mailexploded[1]!=""&& $mailexploded[0]!="") {	
+			//cr√©er un nouveau contact		
+		$user->db -> beginTransaction();													
 			//inserer dans contact 
-			$sqlinsert = "INSERT INTO contact (IdContact,IdContactRef,Name,EMail,Enabled)"
-							." VALUES (?,?,?,?,?)";
-			
-			
-			$stmtinsert = $bddcoopeshop->prepare($sqlinsert);
-			
-			$params = array($numId,$numId,$namenewcontact,$mailami,1);
+			$sqlinsert = "INSERT INTO contact (IdContactRef,Name,EMail,Enabled)"
+							." VALUES (?,?,?,?)";						
+			$stmtinsert = $user->db->prepare($sqlinsert);			
+			$params = array(0,$namenewcontact,$mailami,1);
 			try {
 			$stmtinsert->execute($params);
 			} 
-			catch (POException $e) { die( "Erreur : " . $e->getMessage()); }
+			catch (POException $e) { die( "Erreur : " . $e->getMessage()); }						
+			$numId =  $user->db->lastInsertId();
 			
-			
-			//get myinfo
-			$sqlmymail = 'SELECT C.EMail AS mymail, C.Name AS myname'
-					.' FROM contact as C'
-					.' WHERE IdContact='.$myid;
-			$stmtmail =  $bddcoopeshop->prepare($sqlmymail);
+			//inserer dans user, rn ayant g√©n√©r√© un password				
+			$psswd = "";	
+			for($i = 0; $i<8;$i++)
+				{
+				$d = rand(1,3);
+				$psswd .= ($d==1) ? chr(rand(49,57)) : chr(rand(97,122));
+				}	
+			$sqluser = "INSERT INTO user (IdUser,Enabled,Password)"
+					." VALUES (?,1,PASSWORD(?))";
+			$stmtuser = $user->db->prepare($sqluser);	
 			try {
-				$stmtmail->execute();
-				} 
+			$stmtuser->execute(array($numId,$psswd));
+			} 
 			catch (POException $e) { die( "Erreur : " . $e->getMessage()); }
+		
+			$sqlrights = "INSERT INTO rights (IdUser, Domain, Rights)"
+					. " VALUES(?,?,?)";
 			
-			$res = $stmtmail->fetch(PDO::FETCH_ASSOC);
-			
-			
-			
-			$bddcoopeshop -> commit();	
+			$stmt = $user->db->prepare($sqlrights);
+			$params = array($numId,".",3);
+				try {
+					$stmt->execute($params);
+				} 
+				catch (PDOException $e) { die( "Erreur : " . $e->getMessage()); }
+							
+		$user->db -> commit();	
 			
 			$msg=  '{"isknownuser" : "no"'
 				.' , "validmail" : "yes"'
 				.' , "idcontact" : "'.$numId .'"'
 				.' , "namecontact" : "' .$namenewcontact.'"'
 				.' , "myrights" : "' .$myrights .'"'
-				.' , "mymail" : "' .$res["mymail"].'"'
-				.' , "myname" : "' .$res["myname"].'"'
+				.' , "mymail" : "' .$user->email.'"'
+				.' , "myname" : "' .$user->name.'"'
 				.' , "mailcontact" : "' .$mailami.'"'
+				.' , "password" : "'. $psswd.'"'
 				.' , "iddossier" : "' .$iddossier .'"'
-				.' , "myid" : "' .$myid .'"'
+				.' , "myid" : "' .$user->id .'"'
 				. '}';
 			echo $msg;
 	
@@ -120,7 +98,10 @@ include_once("config.php");
 			.' , "namedossier" : "' .$result["NameDossier"] .'"'
 			.' , "myrights" : "' .$myrights .'"'
 			.' , "iddossier" : "' .$iddossier .'"'
-			.' , "myid" : "' .$myid .'"'
+			.' , "myid" : "' .$user->id .'"'
+			.' , "mymail" : "' .$user->email.'"'
+			.' , "myname" : "' .$user->name.'"'
+			.' , "mailcontact" : "' .$mailami.'"'
 			. '}';
 		echo $msg;
 		

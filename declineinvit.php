@@ -1,60 +1,33 @@
 <?php
 include_once("config.php");
-
 session_start();
-if (($_SESSION["loggeduser"])&&isset($_GET["myid"])&&($_SESSION["loggeduser"]["iduser"]==$_GET["myid"]))
-	{$myid = $_GET["myid"];}
-else {die("IdUser perdu - impossible de continuer");}
-
 
 if (isset($_GET["iddossier"])) 
 	{
 	$iddossier = $_GET["iddossier"];
+	
+	$sqluser = "DELETE FROM pceauser WHERE IdUser = ? AND IdDossier = ?";	
+	$sqlcommun1 = "DELETE FROM pceausercommun WHERE IdUser1 = ? AND IdDossier = ?";
+	$sqlcommun2 = "DELETE FROM pceausercommun WHERE IdUser2 = ? AND IdDossier = ?";
+	
+	
+	$dbconn = new DbConnection();
+	$user = new User($dbconn);
+	$params = array($user->id,$iddossier);
+	
+	$user->db->beginTransaction();
+	
+	$stmt = $user->db->prepare($sqluser);
+	$stmt->execute($params);
 
+	$stmt = $user->db->prepare($sqlcommun1);	
+		$stmt->execute($params);
 
-// ouverture bdd 
-	try	{
-	$bddcoopeshop = new PDO('mysql:host='.$db_server.';dbname='.$db_name, $db_user, $db_password);
-		}
-	catch (Exception $e)
-		{
-	        die('Erreur : ' . $e->getMessage());
-		}	
-// On supprime la ligne sur pceauser et eventuellement sur pceausercommun	
-
-	$sqluser = "DELETE FROM pceauser WHERE IdUser = ".$myid." AND IdDossier = " .$iddossier;
+	$stmt = $user->db->prepare($sqlcommun2);	
+	$stmt->execute($params);	
+	$user->db->commit();
 	
-	$sqlcommun1 = "DELETE FROM pceausercommun WHERE IdUser1 = ".$myid." AND IdDossier = " .$iddossier;
-	$sqlcommun2 = "DELETE FROM pceausercommun WHERE IdUser2 = ".$myid." AND IdDossier = " .$iddossier;
-	
-	$bddcoopeshop->beginTransaction();
-	
-	$stmt = $bddcoopeshop->prepare($sqluser);
-	try 
-	{
-	$stmt->execute();
-	} 
-	catch (POException $e) { die( "Erreur : " . $e->getMessage()); }	
-
-	$stmt = $bddcoopeshop->prepare($sqlcommun1);	
-		try 
-		{
-		$stmt->execute();
-		} 
-		catch (POException $e) { die( "Erreur : " . $e->getMessage()); }
-	
-	$stmt = $bddcoopeshop->prepare($sqlcommun2);	
-				try 
-				{
-				$stmt->execute();
-				} 
-				catch (POException $e) { die( "Erreur : " . $e->getMessage()); }
-	
-	
-	
-	$bddcoopeshop->commit();
-	
-	$answer = '{ "myid" : "'.$myid .'" }';
+	$answer = '{ "myid" : "'.$user->id .'" }';
 	
 	echo $answer;
 }
