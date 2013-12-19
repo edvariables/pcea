@@ -9,6 +9,8 @@
 		
 		<option class="nomavant debit" value="-1">a payé pour moi : </option>
 		<option class="nomapres debit" value="-1">J'ai reçu de</option>	
+		
+		<option class="commentonly" value="0">Commentaire uniquement</option>	
 		</select>
 	</fieldset>
 </div>

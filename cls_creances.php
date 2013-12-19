@@ -11,47 +11,40 @@ class Creances {
 	
 	public $nbrelignes;
 	
-	function __construct($lgdusr, $idd, $idctct) {
+	function __construct($lgdusr, $idd, $idctct, $arrcomm) {
 			
 		$this->loggeduser = $lgdusr;
 		$this->iddossier = $idd;
 		$this->idcontact = $idctct;
-		
-			//connection bdd
-		try	{
-			$bddcoopeshop =new PDO('mysql:host='.$GLOBALS['db_server'].';dbname='.$GLOBALS['db_name'], $GLOBALS['db_user'], $GLOBALS['db_password']);
-			}
-		catch (Exception $e)
-			{
-		        die('Erreur : ' . $e->getMessage());
-			}
-			//préparation requête
+
+		$dbconn = new DbConnection();
 			
-		$sql = 'SELECT LGD.Line, LGD.Price, IFNULL(LGD.Comment, " ") AS Comment, LGD.CreationDate, LGD.CreationIdUser'.
-			' FROM lgdossier LGD ' .
+		$sql = 'SELECT LGD.Line, LGD.IdContact, LGD.Price, IFNULL(LGD.Comment, " ") AS Comment, LGD.IdAnal, LGD.CreationDate, LGD.CreationIdUser'.
+			' FROM lgdossier LGD' .
 			' WHERE IdDossier =' . $this->iddossier .
 			' AND TypeDossier = "PCEA"' .
-			' AND IdContact =' . $this->loggeduser .
-			' AND IdArticle =' . $this->idcontact .
+			' AND (IdContact =' . $this->loggeduser;
+			
+		if (!empty($arrcomm)){
+			foreach ($arrcomm as $idcomm) {
+			$sql  .= ' OR IdContact ='. $idcomm;
+			}
+		}
+		$sql  .=') AND IdArticle =' . $this->idcontact .
 			' ORDER BY CreationDate DESC';
-		//echo($sql);
-		$req = $bddcoopeshop -> prepare($sql);
-		$req->execute();
-		
+
+		$req = $dbconn -> select($sql);
+				
 		$this->nbrelignes = 0;
 		
-		while ($ligne = $req -> fetch(PDO::FETCH_ASSOC)) {
-		
+		while ($ligne = $req -> fetch()) {		
 			$linenum = "line".$this->nbrelignes;
 		 	$this->lines[$linenum] = $ligne;	
 			 $this->nbrelignes++;
-		}	
-		
+		}			
 		$this->lines["nbLignes"] = $this->nbrelignes;
 	}
-	
-	
-	
+		
 	public function serialize($format){
 	
 				if (!isset($format)) {$format = 'json';}  
@@ -60,18 +53,11 @@ class Creances {
 					. '"myId":"'.$this->loggeduser .'"'
 				. ' , "idDossier":"'.$this->iddossier .'"'
 				. ' , "idAmi": '.$this->idcontact 
-			//	. ' , "nbLignes": '.$this->nbrelignes 
 				. ' , "listecreances":' . json_encode($this->lines, JSON_FORCE_OBJECT)
 						. '}';
 						
 					return $json;
 				}	
-	}
-		
-		
+	}				
 }
-
-
-
-
 ?>

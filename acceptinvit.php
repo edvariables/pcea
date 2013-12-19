@@ -3,43 +3,21 @@
 include_once("config.php");
 
 session_start();
-if (($_SESSION["loggeduser"])&&isset($_GET["iddossier"])&&isset($_GET["myid"])&&($_SESSION["loggeduser"]["iduser"]==$_GET["myid"]))
-	{
-	$iddossier = $_GET["iddossier"];	
-	$myid = $_GET["myid"];
-	if (isset($_GET["myrights"])) {
-			$myrights = $_GET["myrights"];
-					}
-	else {$myrights = "";}
 
-	}
-else {
-	die("Pertes de données - Pas de requête");
-	}
-
-
-// ouverture bdd 
-try	{
-	$bddcoopeshop = new PDO('mysql:host='.$db_server.';dbname='.$db_name, $db_user, $db_password);
-}
-catch (Exception $e)
-		{
-	        die('Erreur : ' . $e->getMessage());
-		}
-		
+$iddossier = $_GET["iddossier"];	
+$myrights = $_GET["myrights"];
+	
+$dbconn = new DbConnection();
+$user= new User($dbconn);	
 //changer Status en 'OK' dans pceasuer 
-
- $sqlupdate = "UPDATE pceauser "  
+$sqlupdate = "UPDATE pceauser "  
  		." SET Status = 'OK'" 
-		." WHERE IdUser = ". $myid
-		." AND IdDossier = ". $iddossier;
+		." WHERE IdUser = ?"
+		." AND IdDossier = ?";
 		
-$req = $bddcoopeshop->prepare($sqlupdate);
+$req = $user->db->prepare($sqlupdate);
+$req->execute(array($user->id,$iddossier));
 
-$req->execute();
-
-//reponse 
-echo '{ "myid" : "'.$myid.'" , "iddossier" : "' . $iddossier .'" , "myrights" : "' . $myrights .'" }';
-
+echo '{ "myid" : "'.$user->id.'" , "iddossier" : "' . $iddossier .'" , "myrights" : "' . $myrights .'" }';
 
 ?>

@@ -2,45 +2,37 @@
 
 include_once("config.php");
 session_start();
-if (($_SESSION["loggeduser"])&&($_SESSION["loggeduser"]["iduser"])&&($_SESSION["loggeduser"]["iduser"]==$_GET["myid"]))
 
-{
+$myrights = $_GET["myrights"];
+$idcontact = $_GET["myid"];
+$iddossier = $_GET["iddossier"];
+$idarticle = $_GET["idami"];
+if (($_GET["sens"]==1)||$_GET["sens"]==-1) {
+$myprice = floatval($_GET["sens"]) * floatval(str_replace( ",", ".", $_GET["price"] ));
+}
+else {$myprice=0;}
 
+$comment = ($_GET["comment"]=="Commentaire") ? "" : $_GET["comment"];	
 
-	try	{
-		$bddcoopeshop = new PDO('mysql:host='.$db_server.';dbname='.$db_name, $db_user, $db_password);
-		}
-	catch (Exception $e)
-		{
-	        die('Erreur : ' . $e->getMessage());
-		}
-		$myrights = $_GET["myrights"];
-		$idcontact = $_GET["myid"];
-		$iddossier = $_GET["iddossier"];
-		$idarticle = $_GET["idami"];
-		$myprice = floatval($_GET["sens"])*floatval($_GET["price"]);
-		$comment = ($_GET["comment"]=="Commentaire") ? "" : $_GET["comment"];	
+$dbconn = new DbConnection();
+$user = new User($dbconn);
+
+//dÃ©terminer le numero de ligne	
+$sql = "SELECT IFNULL(MAX(Line),0)+1 AS numLine"
+	." FROM lgdossier"
+	." WHERE IdDossier = ?"
+	." AND TypeDossier = ?";
 	
-	//déterminer le numero de ligne	
-		
-	$sql = "SELECT IFNULL(MAX(Line),0)+1 AS numLine"
-		." FROM lgdossier"
-		." WHERE IdDossier = ".$iddossier
-		." AND TypeDossier = 'PCEA'";
-		
-	$req = $bddcoopeshop -> prepare($sql);
-			$req->execute();
-			
-	$result = $req->fetch(PDO::FETCH_ASSOC);
 	
+$user->db -> beginTransaction();	
+	$req = $user->db -> select($sql,array($iddossier,'PCEA'));		
+	$result = $req->fetch();	
 	$numline = $result["numLine"];
 	
 	$sqlinsert = "INSERT INTO lgdossier (IdContact,IdDossier,TypeDossier,Line,IdArticle,IdAnal,Quantity,Unit,Price,Forfait,Comment,CreationIdUser)"
 			." VALUES (:IdContact,:IdDossier,:TypeDossier,:Line,:IdArticle,:IdAnal,:Quantity,:Unit,:Price,:Forfait,:Comment,:CreationIdUser)";
-	
-	$bddcoopeshop -> beginTransaction();
 			
-	$stmt = $bddcoopeshop -> prepare($sqlinsert);
+	$stmt = $user->db -> prepare($sqlinsert);
 		$stmt->bindParam(':IdContact',$idctct);
 		$stmt->bindValue(':IdDossier',$iddossier);
 		$stmt->bindValue(':TypeDossier','PCEA');
@@ -48,7 +40,7 @@ if (($_SESSION["loggeduser"])&&($_SESSION["loggeduser"]["iduser"])&&($_SESSION["
 		$stmt->bindParam(':IdArticle',$idart);
 		$stmt->bindParam(':IdAnal',$idanal);
 		$stmt->bindValue(':Quantity',1);
-		$stmt->bindValue(':Unit','Ø');
+		$stmt->bindValue(':Unit','Ã˜');
 		$stmt->bindParam(':Price',$price);
 		$stmt->bindValue(':Forfait',0);
 		$stmt->bindValue(':Comment',$comment);
@@ -56,7 +48,7 @@ if (($_SESSION["loggeduser"])&&($_SESSION["loggeduser"]["iduser"])&&($_SESSION["
 	
 	$idctct = $idcontact;
 	$idart = $idarticle;
-	$idanal = ($_GET["sens"] == 1) ? "601" : "531";
+	$idanal = ($_GET["sens"] == 1) ? "601" : (($_GET["sens"] == -1) ? "531" : "0");
 	$price = $myprice;
 	try {
 	$stmt->execute();
@@ -64,28 +56,27 @@ if (($_SESSION["loggeduser"])&&($_SESSION["loggeduser"]["iduser"])&&($_SESSION["
 	catch (POException $e) {
 		 die( "Erreur : " . $e->getMessage());
 		 }
+	
+	if ($_GET["sens"] != 0)	 {
+	
 	$idctct = $idarticle;
 	$idart = $idcontact;
-	$idanal = ($_GET["sens"] != 1) ? "601" : "531";
+	$idanal = ($_GET["sens"] == -1) ? "601" : (($_GET["sens"] == 1) ? "531" : "0");
 	$price = -1*$myprice;
-
+	
 	try {
 		$stmt->execute();
 	} catch (POException $e) {
 		die('Erreur : ' . $e->getMessage());
-		}
+		}	
+	}
 		
-	$bddcoopeshop -> commit();
+$user->db -> commit();
 
-	echo '{"lgduser" : "' .$idcontact .'"'
-		. ', "iddossier" : "'. $iddossier .'"'
-		. ', "myrights" : "'. $myrights 
-		. '"}';
-		}
-else {
-
-echo "Problème de connection: iduser != _session_iduser à l'appel de add_creance.php";
-
-};		
+echo '{"lgduser" : "' .$idcontact .'"'
+	. ', "iddossier" : "'. $iddossier .'"'
+	. ', "idami" : "'. $idarticle .'"'
+	. ', "myrights" : "'. $myrights 
+	. '"}';
 
 ?>		
