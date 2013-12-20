@@ -58,6 +58,10 @@ table.treeTable tbody tr td.infostatut, table.treeTable tbody tr td.infoami{
 table.treeTable tbody tr td.infostatut{
    line-height: 150%;
 }
+table.treeTable tbody tr td.infostatut > a.amiscommuns, table.treeTable tbody tr td.infostatut > span{
+   white-space : nowrap;
+}
+
 table.treeTable tbody tr td.sold {
 	font-size : 0.95em; 
 }
@@ -144,6 +148,12 @@ table.treeTable tbody .linkaddami.disabled{
 table.treeTable tbody td.inputmailami > .linksubmitami, table.treeTable tbody td.inputmailami > .cancel {
 	margin-left : 1em;
 }
+
+table.treeTable tbody td.inputmailami > label {
+	white-space : nowrap;
+}
+
+
 .negative {
 	color : red;
 }
@@ -230,9 +240,7 @@ table.treeTable tbody tr.amis td.amimain span.nameami {
 	background : url(/edv/Images/edit.png) no-repeat 0px 2px;
 }
 */
-table.treeTable tbody tr.dossier td.infostatut  .amiscommuns {
-	margin-left: 1em;
-}
+
 table.treeTable tbody tr.creances span.sommecreance  {
 	float : right;
 	margin-left: 8px;
