@@ -1,11 +1,11 @@
 <?php
 
-/*
 const db_user = 'coopeshop';
 const db_password = 'fnGQSTfwU8qpPSdM';
-*/
+/*
 const db_user = 'root';
 const db_password = '';
+*/
 
 const db_server = 'localhost';
 const db_name = 'coopeshop';

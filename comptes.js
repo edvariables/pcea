@@ -762,7 +762,10 @@ var PHP_PATH = "../pcea/";
 							$rowami.find("td.infoami").append(
 								$("<span></span>")
 									.html("Doit répondre à l'invitation")
-									.css("color","red")
+									.css({
+										"color": "red"
+										, "margin-left": "4px"
+									})
 							);
 						}
 					}//fin de la boucle sur les amis du compte
